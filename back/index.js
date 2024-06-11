@@ -1,15 +1,13 @@
 const express = require("express")
 const axios = require("axios").default
+const ollama = require("ollama")
 require("dotenv").config()
 
 const app = express()
 app.use(express.json())
+var expressWs = require('express-ws')(app);
 
 // chatbot
-const chatbot_url = "http://localhost:11434/api/chat"
-const bot = axios.create({
-    baseURL: chatbot_url
-})
 
 const jira_url = "https://omertemp65.atlassian.net/rest/api/latest/"
 const jira_username = "omertemp65@gmail.com"
@@ -24,24 +22,22 @@ const jira_api = axios.create({
       },
 })
 model = "qwen:0.5b"
-let chatbot_reply;
-app.post("/chat",async (req, res) => {
-    const {prompt} = req.body
-    const data = {
-        "model": model,
-        "stream": false,
-        "messages": [{ "role": "user", "content": prompt }]
-    }
-    chatbot_reply = (await bot.post('/',data)).data.message.content
-    const raw_issues = chatbot_reply.split(".").slice(1).map(issue => issue.slice(0,issue.length))
-    const issues = []
-    for (let index = 0; index < raw_issues.length; index++) {
-        if(index%2==1)continue
-        issues.push(raw_issues[index]);
+app.ws("/chat", (ws, req) => {
+    ws.on("message", async (message) => {
+        const prompt = message
+        console.log(prompt)
+        const chatbot = new ollama.Ollama()
+        const config = {
+            model: 'qwen:0.5b',
+            messages: [{ role: 'user', content: prompt }],
+            stream: true
+        }
+        for await (const token of await chatbot.chat(config)){
+            ws.send(token.message.content)
+        }
         
-    }
-    
-    return res.send(chatbot_reply)
+        ws.send(`reply: , ${prompt}`)
+    })
 })
 
 
