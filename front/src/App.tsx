@@ -3,9 +3,9 @@ import Sidebar from "./components/Sidebar"
 
 export default function App() {
   return (
-    <div className="flex bg-black flex h-screen">
-      <Sidebar className="bg-red-400 basis-1/5"/>
-      <MainConversation className="bg-blue-400 basis-4/5"/>
+    <div className="flex h-screen gap-4">
+      <Sidebar className="basis-1/5 bg-yellow-500 border-black shadow-inner rounded-3xl ml-4"/>
+      <MainConversation className="basis-4/5"/>
     </div>
   )
 }

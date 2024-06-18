@@ -1,7 +1,8 @@
 // const {express} = require("express")
 import {WebSocketExpress} from 'websocket-express'
 import axios from 'axios';
-import { Ollama } from 'ollama';// require("dotenv").config()
+import { Ollama } from 'ollama';
+// require("dotenv").config()
 
 const app = new WebSocketExpress()
 app.use(WebSocketExpress.json())
@@ -29,11 +30,10 @@ const model:string = "qwen:0.5b"
 app.ws("/chat", async (req,res) => {
     const ws = await res.accept();
     ws.on("message", async (request: ChatMessage[]) => {
-        console.log("here")
         const conversation:ChatMessage = JSON.parse(String(request))
         const chatbot = new Ollama()
         const config:any = {
-            model: 'qwen:0.5b',
+            model,
             messages: conversation,
             stream: true
         }
@@ -42,7 +42,6 @@ app.ws("/chat", async (req,res) => {
             ws.send(token.message.content)
         }
         
-        ws.send(`reply: prompt`)
     })
 })
 
